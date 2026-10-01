@@ -1,0 +1,159 @@
+# NYR Item Guard
+#
+# Items no survival player can get are how hacked clients, dupes and staff mistakes show up: a Sharpness 255 sword, an
+# unbreakable chestplate with +1000 armor, 64 totems in one stack, a stack of bedrock, a spawn egg that summons a boss.
+# This fix finds them wherever they turn up (inventories, ender chests, containers, items picked up or dropped) and fixes
+# or removes them. Every removed stack is kept in plugins/NYR-ItemGuard/quarantine, so staff can list it and give
+# it back with /itemguard restore.
+#
+# Items other plugins made are left alone by default (see exempt below), so custom weapons, crate rewards and menu items
+# keep working. Before switching a check to remove, try /itemguard inspect on the items your server gives out.
+#
+# After editing, run /itemguard reload.
+
+# Switch the fix off without removing the plugin.
+enabled: true
+
+# What each check does when it finds something:
+#   fix     repair the item (for unobtainable items and entity data, which cannot be repaired, fix removes)
+#   remove  take the whole stack into quarantine
+#   report  change nothing, only alert staff
+#   off     skip the check
+checks:
+  # Items only creative mode or commands give (see unobtainable-items).
+  unobtainable: remove
+  # More items in one stack than the item allows. Fix keeps a full stack and quarantines the rest.
+  overstacked: fix
+  # A stack size raised above the item's normal one (the max_stack_size component).
+  stack-size-component: fix
+  # Enchantment levels over the game's maximum (Sharpness 255 becomes Sharpness 5; see max-levels).
+  over-enchanted: fix
+  # Enchantments the item cannot take in survival, such as Sharpness on a stick. Books are never checked for this.
+  enchantment-not-for-this-item: fix
+  # Enchantments that exclude each other, such as Sharpness with Smite. The higher one stays.
+  conflicting-enchantments: fix
+  # Items that never break.
+  unbreakable: fix
+  # Hand-made attribute modifiers, such as +1000 attack damage. The item keeps its normal attributes.
+  attribute-modifiers: fix
+  # Potions and tipped arrows with effects no brewing stand makes.
+  custom-potion-effects: fix
+  # Spawn eggs and other items carrying entity data, which can summon anything.
+  entity-data: remove
+
+# Enchantment levels allowed above the game's maximum, by enchantment id. Empty by default.
+max-levels: {}
+#  sharpness: 10
+
+# Items no survival player can obtain. Minecraft ids or wildcards; ids a server version does not have are skipped.
+# Spawners and player heads are not listed because many servers hand them out through plugins; add them if yours does not.
+unobtainable-items:
+  - bedrock
+  - barrier
+  - light
+  - structure_void
+  - structure_block
+  - jigsaw
+  - command_block
+  - chain_command_block
+  - repeating_command_block
+  - command_block_minecart
+  - debug_stick
+  - knowledge_book
+  - end_portal_frame
+  - reinforced_deepslate
+  - budding_amethyst
+  - petrified_oak_slab
+  - trial_spawner
+  - vault
+  - test_block
+  - test_instance_block
+  - farmland
+  - dirt_path
+  - chorus_plant
+  - frogspawn
+  - infested_*
+
+exempt:
+  # Items another plugin stored its own data on (custom weapons, crate keys, menu items). Recommended.
+  items-with-plugin-data: true
+  # Items with a custom model (resource-pack items).
+  items-with-custom-models: true
+  # Item types never checked.
+  materials: []
+  # Items whose name or lore contains any of these words (colours ignored, any case).
+  name-contains: []
+  lore-contains: []
+
+# Players in creative mode can make any item, so they are not checked while in creative. Items they drop are still
+# checked when someone else picks them up or opens the container they went into.
+ignore-creative-players: true
+
+# Tell the player (once per scan) when an item of theirs was fixed or removed.
+tell-player: true
+
+scan:
+  on-join: true
+  # Containers as they open: chests, shulker boxes, barrels, hoppers, other players' inventories.
+  on-open: true
+  # A player's inventory and open container right after they click in it.
+  on-click: true
+  on-pickup: true
+  # Items dropped into the world, from players, mobs and broken containers.
+  dropped-items: true
+  # Items taken from the creative inventory, for creative players who are checked (ignore-creative-players: false).
+  creative-inventory: true
+  # Unobtainable blocks as someone places them.
+  on-place: true
+  ender-chest: true
+  # Every online player's inventory, every this many seconds. 0 turns it off.
+  every-seconds: 60
+
+worlds:
+  # Worlds where items are checked. "*" means every world.
+  enabled:
+    - "*"
+  # Worlds left alone, such as a creative world.
+  disabled: []
+
+alerts:
+  # Staff with nyritemguard.alerts are told what was fixed, and the line goes to the console and to
+  # plugins/NYR-ItemGuard/alerts.log.
+  enabled: true
+  to-staff-chat: true
+  to-console: true
+  to-log-file: true
+  # The same finding for the same player and place is reported at most once in this many seconds.
+  cooldown-seconds: 10
+
+messages:
+  prefix: "&8[&cItem Guard&8] "
+  alert: "{prefix}&e{player}&7: &f{counts} &8({where} at {place})&7: {summary}"
+  alert-quarantine-suffix: " &8[quarantine {ids}]"
+  player-told: "{prefix}&7Items that cannot exist in survival were found ({where}): &f{counts}&8 - &7{summary}"
+  inspect-empty: "{prefix}&7Hold the item you want to inspect."
+  inspect-clean: "{prefix}&aNothing illegal about &f{item}&a."
+  inspect-header: "{prefix}&f{item}&7:"
+  inspect-line: "&8 - &c{check} &8({action})&7: {detail}"
+  scan-usage: "{prefix}&7Usage: /itemguard scan <player>"
+  scan-done: "{prefix}&7Scanned &f{player}&7: &f{count} &7stack(s) changed."
+  player-not-found: "{prefix}&cNo online player named &f{player}&c."
+  quarantine-header: "{prefix}&fQuarantine: &7{count} stack(s), page {page}/{pages}"
+  quarantine-line: "&8 {id} &7{time} &f{item} &7from {player} ({where}): {reasons}"
+  quarantine-line-restored: "&8 {id} {time} {item} from {player}, given back"
+  quarantine-empty: "&8 - &7Nothing here."
+  restore-usage: "{prefix}&7Usage: /itemguard restore <id> (ids are in /itemguard quarantine)"
+  restore-missing: "{prefix}&cNo quarantined item &f{id}&c."
+  restore-already: "{prefix}&c{id} was already given back."
+  restored: "{prefix}&aGave you &f{item} &afrom quarantine {id}. It is marked as reviewed and will not be taken again."
+  fix-off: "{prefix}&cThe fix is switched off in config.yml."
+  players-only: "{prefix}&cOnly players can use that here."
+  status-header: "{prefix}&f{name} &7{version} &8on &7{platform} &8- {state}"
+  state-on: "&aon"
+  state-off: "&coff (enabled: false in config.yml)"
+  reloaded: "{prefix}&aReloaded config.yml; the fix is {state}."
+  reload-failed: "{prefix}&cconfig.yml has an error, so the defaults are running: &f{problem}"
+  unknown-command: "{prefix}&7Unknown subcommand. Try &f/{label} help&7."
+  no-permission: "{prefix}&cYou do not have permission to do that."
+  help-header: "{prefix}&fCommands:"
+  help-line: "&8 - &f/{label} {command} &7{description}"

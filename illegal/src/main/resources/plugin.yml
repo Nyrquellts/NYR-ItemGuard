@@ -1,0 +1,22 @@
+name: NYR-ItemGuard
+main: com.nyr.fixes.illegal.IllegalItemsPlugin
+version: '${version}'
+api-version: '1.20'
+folia-supported: true
+author: NYR
+description: Hacked, duped and admin-only items are fixed or taken into quarantine as soon as they turn up.
+commands:
+  itemguard:
+    description: NYR Item Guard.
+    usage: /itemguard <inspect|scan|quarantine|restore|status|reload>
+    aliases: [nyritemguard]
+permissions:
+  nyritemguard.admin:
+    description: /itemguard inspect, scan, quarantine, restore, status and reload.
+    default: op
+  nyritemguard.alerts:
+    description: Receive staff alerts when an illegal item is found.
+    default: op
+  nyritemguard.bypass:
+    description: Items this player holds, clicks, picks up or drops are never checked.
+    default: false

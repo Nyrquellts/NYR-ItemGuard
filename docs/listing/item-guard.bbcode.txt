@@ -1,0 +1,41 @@
+[B]NYR Item Guard[/B]
+Fixes or quarantines the items hacked clients, dupes and staff mistakes leave on survival servers: Sharpness 255 swords, unbreakable gear with +1000 damage, 64 totems in one stack, bedrock, spawn eggs carrying entity data. Stacks it takes are kept in quarantine, not deleted.
+
+[B]Launch offer[/B]
+25% off for the first 7 days after release: $4.49 instead of $5.99.
+
+[B]Core features[/B]
+[LIST]
+[*][B]10 checks, each set to fix, remove, report or off.[/B] Enchantments over the vanilla maximum are lowered to it (Sharpness 255 becomes Sharpness V), unbreakable flags are removed, hand-made attribute modifiers are replaced by the item's normal ones, an overstack keeps one legal stack and the rest goes to quarantine, and creative-only items (bedrock, barriers, command blocks, structure blocks, debug sticks and more) are taken.
+[*][B]Scans where items move.[/B] On join, every 60 seconds, when a container opens, after every inventory click, on pickup, on items dropped into the world, when unobtainable blocks are placed, and in ender chests. Shulker boxes and bundles are checked inside.
+[*][B]Quarantine, not deletion.[/B] Every stack taken is saved in plugins/NYR-ItemGuard/quarantine with the owner, the location and the reason. /itemguard restore gives it back with an HMAC-SHA256 mark signed by a key only your server has, so it is not taken again.
+[*][B]Staff alerts.[/B] Chat, console and alerts.log get the player, container, coordinates, what was fixed or removed and the quarantine ids. The same finding repeats at most every 10 seconds.
+[*][B]/itemguard inspect[/B] shows why the item in your hand is or is not flagged, without changing it.
+[/LIST]
+
+[B]Safety and compatibility[/B]
+[LIST]
+[*][B]Custom RPG items:[/B] items with a PersistentDataContainer (PDC) tag from any other plugin are skipped by default (exempt.items-with-plugin-data), and so are items with CustomModelData or an item_model. You can also exempt materials, names and lore.
+[*][B]Folia:[/B] the 60-second scan is a global timer that hands each player's scan to that player's own entity scheduler. Event scans run on the region thread that fired the event. Tested live on Folia 1.21.11.
+[*][B]Paper, Purpur and Spigot:[/B] tested live on Paper 1.20.6, 1.21.1, 1.21.3, 1.21.4, 1.21.5, 1.21.8, 1.21.11 and 26.1.2, Purpur 1.21.11 and Spigot 1.21.11. 274 automated checks with connected test clients across 11 test servers, Folia included, 0 failed. Starts and loads cleanly on Paper 26.2.
+[*][B]Requirements:[/B] Java 21 or newer (Minecraft 26 servers run on Java 25). No dependencies, no telemetry, one 122 KB jar.
+[*]Creative players are not checked by default, and players with nyritemguard.bypass never are.
+[*][B]Scope:[/B] it catches what dupes and hacks leave behind: overstacked stacks, raised stack sizes, impossible enchantments and attributes. It does not patch the dupe glitches themselves.
+[/LIST]
+
+[B]Commands and permissions[/B]
+[TABLE]
+[TR][TH]Command[/TH][TH]What it does[/TH][TH]Permission[/TH][TH]Default[/TH][/TR]
+[TR][TD]/itemguard inspect[/TD][TD]Explains the held item, changes nothing[/TD][TD]nyritemguard.admin[/TD][TD]op[/TD][/TR]
+[TR][TD]/itemguard scan <player>[/TD][TD]Checks a player's inventory and ender chest now[/TD][TD]nyritemguard.admin[/TD][TD]op[/TD][/TR]
+[TR][TD]/itemguard quarantine [page][/TD][TD]Lists taken stacks with owner, place and reason[/TD][TD]nyritemguard.admin[/TD][TD]op[/TD][/TR]
+[TR][TD]/itemguard restore <id>[/TD][TD]Gives a quarantined stack back, marked as reviewed[/TD][TD]nyritemguard.admin[/TD][TD]op[/TD][/TR]
+[TR][TD]/itemguard status[/TD][TD]Active checks, items fixed and removed since start[/TD][TD]nyritemguard.admin[/TD][TD]op[/TD][/TR]
+[TR][TD]/itemguard reload[/TD][TD]Reloads config.yml[/TD][TD]nyritemguard.admin[/TD][TD]op[/TD][/TR]
+[TR][TD]none[/TD][TD]Receives staff alerts[/TD][TD]nyritemguard.alerts[/TD][TD]op[/TD][/TR]
+[TR][TD]none[/TD][TD]This player's items are never checked[/TD][TD]nyritemguard.bypass[/TD][TD]nobody[/TD][/TR]
+[/TABLE]
+Alias: /nyritemguard
+
+[B]Support[/B]
+Join the Discord at [URL]https://discord.gg/T9EdGMJP5[/URL] and DM me with your server software and version, the plugin version and the console lines around the problem.
